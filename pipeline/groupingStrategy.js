@@ -580,7 +580,10 @@ class BatchedVisionStrategy extends GroupingStrategy {
         notifyProgress(opts, { phase: 'analyze', done: 0, total: 0 });
         const resp = await client.messages.create({
           model: this.model,
-          max_tokens: 3000,
+          // Scale with shoot size: ~55 output tokens per assignment (+ adaptive-
+          // thinking headroom). A fixed 3000 truncated mid-JSON ("Unterminated
+          // string") on a 56-photo shoot — found by the 2026-07-21 cost sweep.
+          max_tokens: Math.max(3000, photoPaths.length * 80 + 2000),
           output_config: outputConfig(this.model, BATCH_SCHEMA, 'medium'),
           system: BATCH_SYSTEM,
           messages: [{ role: 'user', content }],
