@@ -22,11 +22,20 @@
  *   node pipeline/eval/comps.js                    # LIVE (needs GRAILED_ALGOLIA_KEY)
  *   node pipeline/eval/comps.js --case=isoknock-brown-hoodie
  *   node pipeline/eval/comps.js --json --gate
+ *   node pipeline/eval/comps.js --attrs=out.json   # override each case's attributes with a
+ *                                                  # real extractAttributes output (JSON map
+ *                                                  # case→attributes) — the sweep's downstream
+ *                                                  # check that a cheaper ATTRIBUTE_MODEL didn't
+ *                                                  # silently tank comp recall. In --dry-run the
+ *                                                  # canned responses replay what the FIXTURE's
+ *                                                  # original queries returned, so each result
+ *                                                  # reports queryMatchesFixture — false means
+ *                                                  # the replay is approximate for that row.
  */
 
 const fs = require('fs');
 const path = require('path');
-const { getCompsTiered } = require('../priceProvider');
+const { getCompsTiered, buildNarrowQueryText } = require('../priceProvider');
 const { computeRange, exactMatchTier } = require('../range');
 
 const FIX_DIR = path.join(__dirname, '..', 'fixtures', 'comps');
@@ -38,6 +47,7 @@ const DRY = has('--dry-run');
 const JSON_OUT = has('--json');
 const DO_GATE = has('--gate');
 const ONLY = val('--case', null);
+const ATTRS_FILE = val('--attrs', null);
 
 const DEFAULT_RECALL_K = 10;
 const DEFAULT_PRICE_TOL_PCT = 30;
@@ -115,13 +125,35 @@ async function main() {
   const cases = loadCases();
   if (!cases.length) { console.error(`No fixtures in ${FIX_DIR}`); process.exit(2); }
 
+  // Optional attribute overrides (JSON map case→attributes) — a real
+  // extractAttributes output replaces the fixture's canned attributes, so the
+  // same known-sale assertions run against what a given model ACTUALLY extracted.
+  let attrOverrides = {};
+  if (ATTRS_FILE) {
+    try { attrOverrides = JSON.parse(fs.readFileSync(ATTRS_FILE, 'utf8')); }
+    catch (e) { console.error(`--attrs: cannot read ${ATTRS_FILE}: ${e.message}`); process.exit(2); }
+  }
+
   const results = [];
   for (const fx of cases) {
     const provider = DRY ? new CannedProvider(fx) : liveProvider();
+    const attrs = attrOverrides[fx.name] || fx.attributes;
+    const overridden = Boolean(attrOverrides[fx.name]);
+    // Canned responses were captured for the FIXTURE's queries; if the override
+    // builds a different narrow query, a dry-run replay is only approximate.
+    const fixtureNarrow = buildNarrowQueryText(fx.attributes);
+    const actualNarrow = buildNarrowQueryText(attrs);
+    const queryMatchesFixture = String(fixtureNarrow || '').toLowerCase() === String(actualNarrow || '').toLowerCase();
     let res;
-    try { res = await getCompsTiered(provider, fx.attributes); }
+    try { res = await getCompsTiered(provider, attrs); }
     catch (e) { console.error(`[${fx.name}] ${e.message}`); process.exit(2); }
     const r = scoreCase(fx, res);
+    if (overridden) {
+      r.attrsOverridden = true;
+      r.queryMatchesFixture = queryMatchesFixture;
+      r.narrowQuery = actualNarrow;
+      if (DRY && !queryMatchesFixture) r.notes.push(`CAVEAT: overridden attrs build narrow query "${actualNarrow || '(none)'}" ≠ fixture's "${fixtureNarrow || '(none)'}" — canned replay is approximate; run live for a real answer`);
+    }
     results.push({ case: fx.name, ...r });
     if (!JSON_OUT) {
       console.log(`\n${r.pass ? '✓' : '✗'} ${fx.name}  [tier: ${r.tier}${r.query ? ` "${r.query}"` : ''} · ${r.exactMatchCount ?? 0} exact · conf ${r.confidence ?? 'n/a'}]`);

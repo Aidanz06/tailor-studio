@@ -1,0 +1,20 @@
+{
+  "_note": "Real photos (shoot-varied-01 item_1) — replaces the placeholder supreme-cdg-collab intent: brand = primary (Supreme), partner in collaboration. Yellowing = visible wear.",
+  "brand": "Supreme",
+  "brand_min_confidence": 0.7,
+  "model": [
+    "box logo",
+    "split box"
+  ],
+  "collaboration": "Comme des Garcons",
+  "category": "tops",
+  "subcategory_any": [
+    "hoodie",
+    "hooded sweatshirt",
+    "pullover"
+  ],
+  "condition_rating": "Used",
+  "primary_color": "",
+  "size": "L",
+  "_color_note": "cream vs white is a coin-flip judgment — color skipped for this case"
+}

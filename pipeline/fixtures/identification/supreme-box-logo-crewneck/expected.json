@@ -1,0 +1,17 @@
+{
+  "_note": "Real photos (shoot-varied-01 item_8). Well-known brand + model (box logo) with a tonal black-on-black logo.",
+  "brand": "Supreme",
+  "brand_min_confidence": 0.7,
+  "model": [
+    "box logo"
+  ],
+  "collaboration": "",
+  "category": "tops",
+  "subcategory_any": [
+    "sweatshirt",
+    "crewneck"
+  ],
+  "condition_rating": "",
+  "primary_color": "black",
+  "size": ""
+}

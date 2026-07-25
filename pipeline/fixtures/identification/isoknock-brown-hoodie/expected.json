@@ -5,8 +5,15 @@
   "model": [],
   "collaboration": "",
   "category": "tops",
-  "subcategory_any": ["hoodie", "hoodies", "sweatshirt", "pullover"],
+  "subcategory_any": [
+    "hoodie",
+    "hoodies",
+    "sweatshirt",
+    "pullover"
+  ],
   "condition_rating": "Gently used",
   "primary_color": "brown",
-  "size": ""
+  "size": "",
+  "live_skip": true,
+  "_live_skip_note": "item-1.jpg is a PLACEHOLDER card, not real photos — live runs skip this case (dry-run still scores sample_response.json). Replace with real photos and delete live_skip to enable."
 }

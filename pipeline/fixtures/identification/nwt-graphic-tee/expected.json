@@ -5,8 +5,15 @@
   "model": [],
   "collaboration": "",
   "category": "tops",
-  "subcategory_any": ["t-shirt", "tee", "short sleeve t-shirt", "graphic tee"],
+  "subcategory_any": [
+    "t-shirt",
+    "tee",
+    "short sleeve t-shirt",
+    "graphic tee"
+  ],
   "condition_rating": "New with tags",
   "primary_color": "white",
-  "size": ""
+  "size": "",
+  "live_skip": true,
+  "_live_skip_note": "item-1.jpg is a PLACEHOLDER card, not real photos — live runs skip this case (dry-run still scores sample_response.json). Replace with real photos and delete live_skip to enable."
 }

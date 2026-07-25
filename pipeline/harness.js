@@ -25,6 +25,12 @@
  *   node pipeline/harness.js --live --strategies=baseline,descriptor-improved,batched-vision,embedding-voyage
  *   node pipeline/harness.js --json                 # machine-readable results to stdout
  *   node pipeline/harness.js --out=results.json     # also write results file
+ *   node pipeline/harness.js --gt=grailed-vision-test/ground-truth.shoot-x.json
+ *                                                   # score a different labeled shoot (default:
+ *                                                   # ground-truth.json). Shoots are evaluated
+ *                                                   # separately — real grouping runs one shoot
+ *                                                   # per batch, and batched-vision caps ~75
+ *                                                   # photos/request, so pools never merge.
  */
 
 const fs = require('fs');
@@ -329,11 +335,13 @@ async function main() {
   const asJson = args.includes('--json');
   const outArg = args.find((a) => a.startsWith('--out='));
   const stratArg = args.find((a) => a.startsWith('--strategies='));
+  const gtArg = args.find((a) => a.startsWith('--gt='));
+  const gtFile = gtArg ? (path.isAbsolute(gtArg.split('=')[1]) ? gtArg.split('=')[1] : path.join(REPO, gtArg.split('=')[1])) : GT_FILE;
   const defaultOffline = ['baseline', 'descriptor-improved', 'descriptor-improved-noexif', 'descriptor-improved-complete'];
   const defaultLive = ['baseline', 'descriptor-improved', 'descriptor-haiku', 'batched-vision', 'batched-haiku', 'embedding-voyage'];
   const strategies = stratArg ? stratArg.split('=')[1].split(',') : (live ? defaultLive : defaultOffline);
 
-  const { rel, abs, truth } = loadGroundTruth();
+  const { rel, abs, truth } = loadGroundTruth(gtFile);
   const truthByAbs = new Map(abs.map((a, i) => [path.resolve(a), truth[i]]));
   const ctx = { absOrder: abs, relOrder: rel, fixtures: live ? null : loadFixtures() };
 
@@ -352,7 +360,7 @@ async function main() {
 
   const ok = results.filter((r) => !r.error);
   if (asJson) {
-    process.stdout.write(JSON.stringify({ mode: live ? 'live' : 'offline', results: ok.map((r) => ({ name: r.name, metrics: r.m, meta: r.meta, cost: r.cost, groups: r.groups.map((g) => ({ groupId: g.groupId, photos: g.photos.map((p) => path.relative(REPO, p)), confidence: g.confidence, autoAccept: g.autoAccept, flags: g.flags })) })) }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ mode: live ? 'live' : 'offline', gt: path.relative(REPO, gtFile), results: ok.map((r) => ({ name: r.name, metrics: r.m, meta: r.meta, cost: r.cost, groups: r.groups.map((g) => ({ groupId: g.groupId, photos: g.photos.map((p) => path.relative(REPO, p)), confidence: g.confidence, autoAccept: g.autoAccept, flags: g.flags })) })) }, null, 2) + '\n');
   } else {
     console.log(`\nPhoto-clustering harness — ${live ? 'LIVE' : 'OFFLINE (fixtures)'} — ${abs.length} photos, ${new Set(truth).size} items\n`);
     printTable(ok);
@@ -360,7 +368,7 @@ async function main() {
   }
   if (outArg) {
     const outFile = path.isAbsolute(outArg.split('=')[1]) ? outArg.split('=')[1] : path.join(REPO, outArg.split('=')[1]);
-    fs.writeFileSync(outFile, JSON.stringify({ mode: live ? 'live' : 'offline', generatedAt: new Date().toISOString(), results: ok.map((r) => ({ name: r.name, metrics: r.m, meta: r.meta, cost: r.cost })) }, null, 2));
+    fs.writeFileSync(outFile, JSON.stringify({ mode: live ? 'live' : 'offline', gt: path.relative(REPO, gtFile), generatedAt: new Date().toISOString(), results: ok.map((r) => ({ name: r.name, metrics: r.m, meta: r.meta, cost: r.cost })) }, null, 2));
     console.error(`\nWrote ${outFile}`);
   }
 }

@@ -1,0 +1,18 @@
+{
+  "_note": "Real photos (shoot-varied-01 item_4). Collab handling: primary brand Nike, partner NOCTA — plus a style-code tag (DJ5586-012).",
+  "brand": "Nike",
+  "brand_min_confidence": 0.6,
+  "model": [],
+  "collaboration": "NOCTA",
+  "category": "outerwear",
+  "subcategory_any": [
+    "anorak",
+    "windbreaker",
+    "jacket",
+    "half-zip",
+    "pullover"
+  ],
+  "condition_rating": "",
+  "primary_color": "grey",
+  "size": "L"
+}

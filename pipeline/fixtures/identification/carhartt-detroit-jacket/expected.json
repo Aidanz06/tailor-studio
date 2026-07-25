@@ -2,11 +2,20 @@
   "_note": "Baseline good case — well-known brand + model.",
   "brand": "Carhartt",
   "brand_min_confidence": 0.6,
-  "model": ["Detroit"],
+  "model": [
+    "Detroit"
+  ],
   "collaboration": "",
   "category": "outerwear",
-  "subcategory_any": ["jacket", "work jacket", "chore jacket", "denim jacket"],
+  "subcategory_any": [
+    "jacket",
+    "work jacket",
+    "chore jacket",
+    "denim jacket"
+  ],
   "condition_rating": "Used",
   "primary_color": "brown",
-  "size": ""
+  "size": "",
+  "live_skip": true,
+  "_live_skip_note": "item-1.jpg is a PLACEHOLDER card, not real photos — live runs skip this case (dry-run still scores sample_response.json). Replace with real photos and delete live_skip to enable."
 }

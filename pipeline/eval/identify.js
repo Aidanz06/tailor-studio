@@ -63,8 +63,21 @@ async function actualFor(c) {
 const SYMB = { pass: '✓', fail: '✗', skip: '·' };
 
 async function main() {
-  const cases = loadCases();
+  let cases = loadCases();
   if (!cases.length) { console.error(`No fixtures in ${FIX_DIR}`); process.exit(2); }
+
+  // LIVE runs skip fixtures whose committed photos are placeholders (marked
+  // `live_skip` in expected.json) — scoring the vision model on a brown
+  // placeholder card would poison the accuracy numbers. Dry-run keeps them.
+  const skipped = [];
+  if (!DRY) {
+    cases = cases.filter((c) => {
+      if (c.expected.live_skip) { skipped.push(c.name); return false; }
+      return true;
+    });
+    if (skipped.length) console.error(`[live] skipping placeholder-photo case(s): ${skipped.join(', ')}`);
+    if (!cases.length) { console.error('No live-runnable fixtures (all placeholders).'); process.exit(2); }
+  }
 
   const results = [];
   // Live-mode cost accounting (review 2026-07-17: model-default changes must be
@@ -75,8 +88,17 @@ async function main() {
     // For LIVE stability, run each case RUNS times and score every run.
     for (let i = 0; i < RUNS; i++) {
       let actual;
-      try { actual = await actualFor(c); }
-      catch (e) { console.error(`[${c.name}] run ${i + 1}: ${e.message}`); process.exit(2); }
+      const t0 = Date.now();
+      // Live API calls can hiccup mid-run (rate limit / 529) — retry twice with
+      // backoff before giving up, so one transient doesn't discard 70+ paid calls.
+      let lastErr = null;
+      for (let attempt = 0; attempt < 3 && !actual; attempt++) {
+        if (attempt) await new Promise((r) => setTimeout(r, 2000 * attempt * attempt));
+        try { actual = await actualFor(c); }
+        catch (e) { lastErr = e; if (DRY) break; console.error(`[${c.name}] run ${i + 1} attempt ${attempt + 1}: ${e.message}`); }
+      }
+      if (!actual) { console.error(`[${c.name}] run ${i + 1}: ${lastErr.message}`); process.exit(2); }
+      const wallMs = Date.now() - t0;
       if (actual.__usage) {
         const { usdFromUsage } = require('../groupingStrategy');
         cost.model = actual.__model || cost.model;
@@ -88,7 +110,7 @@ async function main() {
         cost.cacheWrite += actual.__usage.cache_creation_input_tokens || 0;
       }
       const r = scoreCase(c.expected, actual);
-      results.push({ case: c.name, run: i + 1, ...r, actual });
+      results.push({ case: c.name, run: i + 1, wallMs, ...r, actual });
       if (!JSON_OUT) {
         const line = Object.entries(r.fields).map(([f, v]) => `${SYMB[v]}${f}`).join(' ');
         const tag = RUNS > 1 ? ` (run ${i + 1})` : '';
@@ -102,7 +124,16 @@ async function main() {
   const g = gate(agg);
 
   if (JSON_OUT) {
-    console.log(JSON.stringify({ mode: DRY ? 'dry-run' : 'live', runs: RUNS, agg: { per: agg.per, overall: agg.overall, nwtViolations: agg.nwtViolations }, gate: g, ...(cost.calls ? { cost } : {}) }, null, 2));
+    // results[] carries per-case fields + wallMs + the raw `actual` attributes —
+    // the sweep feeds each model's real output into the downstream comps eval.
+    console.log(JSON.stringify({
+      mode: DRY ? 'dry-run' : 'live', runs: RUNS,
+      agg: { per: agg.per, overall: agg.overall, nwtViolations: agg.nwtViolations },
+      gate: g,
+      ...(cost.calls ? { cost } : {}),
+      ...(skipped.length ? { skippedPlaceholderCases: skipped } : {}),
+      results: results.map((r) => ({ case: r.case, run: r.run, wallMs: r.wallMs, fields: r.fields, nwtViolation: r.nwtViolation, notes: r.notes, actual: r.actual })),
+    }, null, 2));
   } else {
     console.log('\n──────── summary' + (DRY ? ' (dry-run — sample_response.json, not live)' : ' (live)') + ' ────────');
     for (const f of Object.keys(agg.per)) {

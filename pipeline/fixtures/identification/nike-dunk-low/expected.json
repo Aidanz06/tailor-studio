@@ -2,11 +2,21 @@
   "_note": "Tester failure: brand + silhouette not identified; downstream didn't select Nike / high-top sneaker.",
   "brand": "Nike",
   "brand_min_confidence": 0.6,
-  "model": ["Dunk", "Dunk Low"],
+  "model": [
+    "Dunk",
+    "Dunk Low"
+  ],
   "collaboration": "",
   "category": "footwear",
-  "subcategory_any": ["sneakers", "high top sneakers", "low top sneakers", "dunk"],
+  "subcategory_any": [
+    "sneakers",
+    "high top sneakers",
+    "low top sneakers",
+    "dunk"
+  ],
   "condition_rating": "Gently used",
   "primary_color": "brown",
-  "size": ""
+  "size": "",
+  "live_skip": true,
+  "_live_skip_note": "item-1.jpg is a PLACEHOLDER card, not real photos — live runs skip this case (dry-run still scores sample_response.json). Replace with real photos and delete live_skip to enable."
 }

@@ -51,6 +51,7 @@
     "@fontsource/instrument-serif": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
+    "@huggingface/transformers": "^4.2.0",
     "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-scroll-area": "^1.2.13",
     "@radix-ui/react-select": "^2.3.2",
