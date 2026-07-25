@@ -9,7 +9,10 @@
  * sneakers") still passes — we're measuring identification, not string equality.
  */
 
-const norm = (s) => String(s ?? '').toLowerCase().trim();
+// Strip diacritics before comparing — "Comme des Garçons" must match an
+// expected "Comme des Garcons" (2026-07 sweep: all three models were marked
+// wrong on a collab they answered correctly, purely on the cedilla).
+const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 /** true if either normalized string contains the other (non-empty). */
 function contains(a, b) {
   const x = norm(a), y = norm(b);

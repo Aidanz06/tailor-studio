@@ -70,3 +70,11 @@ test('aggregate + gate: an NWT violation fails the gate', () => {
   assert.strictEqual(agg.nwtViolations, 1);
   assert.strictEqual(gate(agg).pass, false);
 });
+
+test('diacritics do not fail a correct answer (Garçons vs Garcons)', () => {
+  const r = scoreCase(
+    { collaboration: 'Comme des Garcons', brand: 'Supreme', brand_min_confidence: 0.5 },
+    { collaboration: 'Comme des Garçons', resembles_brand: 'Supreme', brand_confidence: 0.9 }
+  );
+  assert.strictEqual(r.fields.collaboration, 'pass');
+});
