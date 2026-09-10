@@ -1,5 +1,5 @@
 {
-  "name": "grailed-automation-poc",
+  "name": "tailor-studio",
   "version": "0.0.1",
   "private": true,
   "description": "POC: persistent Grailed session + programmatic React-form fill via Electron BrowserView",

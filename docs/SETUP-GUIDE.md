@@ -74,22 +74,22 @@ In Terminal, run these one at a time (this puts the app in a folder on your
 Desktop):
 ```
 cd ~/Desktop
-git clone https://github.com/Aidanz06/Grailed-automation.git
-cd Grailed-automation
+git clone https://github.com/Aidanz06/tailor-studio.git
+cd tailor-studio
 ```
 
 > If GitHub asks you to sign in, make a free account at https://github.com and
 > tell the owner your GitHub username so they can add you to the repo. Prefer
 > clicking over typing? You can use **GitHub Desktop** instead
-> (https://desktop.github.com): paste `https://github.com/Aidanz06/Grailed-automation.git`
+> (https://desktop.github.com): paste `https://github.com/Aidanz06/tailor-studio.git`
 > as the repo to clone, then come back to Terminal and run
-> `cd ~/Desktop/Grailed-automation`.
+> `cd ~/Desktop/tailor-studio`.
 
 ---
 
 ## Step 3 — Install the app's parts
 
-Still in the `Grailed-automation` folder, run:
+Still in the `tailor-studio` folder, run:
 ```
 npm install
 ```
@@ -103,9 +103,9 @@ good.
 
 The app needs the key the owner sent you to write listings and look up prices.
 You'll put it in a small settings file called `.env.local` inside the
-`Grailed-automation` folder.
+`tailor-studio` folder.
 
-**Do this in Terminal** (make sure you're still in the `Grailed-automation`
+**Do this in Terminal** (make sure you're still in the `tailor-studio`
 folder — your prompt should show it):
 
 1. Open a blank file in a simple editor:
@@ -148,7 +148,7 @@ you use the app — closing it closes the app.
 
 Next time you want to open the app, you only need:
 ```
-cd ~/Desktop/Grailed-automation
+cd ~/Desktop/tailor-studio
 npm run ui
 ```
 
@@ -181,7 +181,7 @@ That's the whole loop. Import a batch, review, fill, publish, repeat.
 The owner will keep improving the app. To pull the latest version, **quit the app
 first**, then in Terminal run:
 ```
-cd ~/Desktop/Grailed-automation
+cd ~/Desktop/tailor-studio
 git pull
 npm install
 npm run ui:build
