@@ -25,5 +25,6 @@ POC-FINDINGS.md
 docs/*
 !docs/SETUP-GUIDE.md
 !docs/ui-improvements/
+!docs/tailor-studio-design.pdf
 CHANGELOG.md
 ROADMAP.md

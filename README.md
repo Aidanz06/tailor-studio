@@ -10,6 +10,10 @@ window. Everything the app automates happens *before* the point of sale:
 grouping photos, writing listings, pricing against sold comps, and typing the
 draft into the sell form for your review.
 
+**[📄 Design overview deck](docs/tailor-studio-design.pdf)** — a 12-page visual
+walkthrough of the product: the problem, the five-stage workflow, and the
+safety rails.
+
 ## The workflow
 
 1. **Import** — point the app at a photo-shoot folder. Claude vision groups the
